@@ -19,7 +19,7 @@ const Version = "0.1.0"
 
 var (
 	origin             string
-	url                string
+	remoteUrl          string
 	protocol           string
 	displayHelp        bool
 	displayVersion     bool
@@ -34,7 +34,7 @@ var (
 
 func init() {
 	flag.StringVar(&origin, "origin", "http://localhost/", "origin of WebSocket client")
-	flag.StringVar(&url, "url", "ws://localhost:1337/ws", "WebSocket server address to connect to")
+	flag.StringVar(&remoteUrl, "url", "ws://localhost:1337/ws", "WebSocket server address to connect to")
 	flag.StringVar(&protocol, "protocol", "", "WebSocket subprotocol")
 	flag.BoolVar(&insecureSkipVerify, "insecureSkipVerify", false, "Skip TLS certificate verification")
 	flag.BoolVar(&displayHelp, "help", false, "Display help information about wsd")
@@ -85,8 +85,8 @@ func outLoop(ws *websocket.Conn, out <-chan []byte, errors chan<- error) {
 	}
 }
 
-func dial(url, protocol, origin string) (ws *websocket.Conn, err error) {
-	config, err := websocket.NewConfig(url.QueryEscape(url), origin)
+func dial(dialUrl, protocol, origin string) (ws *websocket.Conn, err error) {
+	config, err := websocket.NewConfig(url.QueryEscape(dialUrl), origin)
 	if err != nil {
 		return nil, err
 	}
@@ -113,12 +113,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	ws, err := dial(url, protocol, origin)
+	ws, err := dial(remoteUrl, protocol, origin)
 
 	if protocol != "" {
-		fmt.Printf("connecting to %s via %s from %s...\n", yellow(url), yellow(protocol), yellow(origin))
+		fmt.Printf("connecting to %s via %s from %s...\n", yellow(remoteUrl), yellow(protocol), yellow(origin))
 	} else {
-		fmt.Printf("connecting to %s from %s...\n", yellow(url), yellow(origin))
+		fmt.Printf("connecting to %s from %s...\n", yellow(remoteUrl), yellow(origin))
 	}
 
 	defer ws.Close()
@@ -127,7 +127,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("successfully connected to %s\n\n", green(url))
+	fmt.Printf("successfully connected to %s\n\n", green(remoteUrl))
 
 	wg.Add(3)
 
