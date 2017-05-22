@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"sync"
 
@@ -85,7 +86,7 @@ func outLoop(ws *websocket.Conn, out <-chan []byte, errors chan<- error) {
 }
 
 func dial(url, protocol, origin string) (ws *websocket.Conn, err error) {
-	config, err := websocket.NewConfig(url, origin)
+	config, err := websocket.NewConfig(url.QueryEscape(url), origin)
 	if err != nil {
 		return nil, err
 	}
